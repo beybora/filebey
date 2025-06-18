@@ -11,7 +11,7 @@ import AppLogo from './AppLogo.vue';
 const mainNavItems: NavItem[] = [
     {
         title: 'My Files',
-        href: '#',
+        href: '/my-files',
         icon: Files,
     },
     {
