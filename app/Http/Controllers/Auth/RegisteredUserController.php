@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\File;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -46,6 +47,11 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return to_route('dashboard');
+        $file = new File();
+        $file->name = $user->email;
+        $file->is_folder = 1;
+        $file->makeRoot()->save();
+
+        return to_route('myFiles');
     }
 }
