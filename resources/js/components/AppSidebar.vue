@@ -1,82 +1,97 @@
-<script setup lang="ts">
-import NavFooter from '@/components/NavFooter.vue';
-import NavMain from '@/components/NavMain.vue';
-import NavUser from '@/components/NavUser.vue';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/vue3';
-import { BookOpen, ExternalLink, Files, Folder, LayoutGrid, Trash, Plus } from 'lucide-vue-next';
-import AppLogo from './AppLogo.vue';
-
-const mainNavItems: NavItem[] = [
-    {
-        title: 'My Files',
-        href: '/my-files',
-        icon: Files,
-    },
-    {
-        title: 'Shared with me',
-        href: '#',
-        icon: ExternalLink,
-    },
-    {
-        title: 'Shared by me',
-        href: '#',
-        icon: LayoutGrid,
-    },
-    {
-        title: 'Trash',
-        href: '#',
-        icon: Trash,
-    },
-];
-
-// const footerNavItems: NavItem[] = [
-//     {
-//         title: 'Github Repo',
-//         href: 'https://github.com/laravel/vue-starter-kit',
-//         icon: Folder,
-//     },
-//     {
-//         title: 'Documentation',
-//         href: 'https://laravel.com/docs/starter-kits#vue',
-//         icon: BookOpen,
-//     },
-// ];
-</script>
-
 <template>
     <Sidebar collapsible="icon" variant="inset">
-        <SidebarHeader>
-            <SidebarMenu>
-                <SidebarMenuItem>
-                    <SidebarMenuButton size="lg" as-child>
-                        <Link :href="route('dashboard')">
-                            <AppLogo />
-                        </Link>
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
-            </SidebarMenu>
-        </SidebarHeader>
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" as-child>
+              <Link :href="route('myFiles')">
+                <AppLogo />
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
 
-        <SidebarContent>
-            <NavMain :items="mainNavItems" />
-        </SidebarContent>
+      <SidebarContent>
+        <NavMain :items="mainNavItems" />
+      </SidebarContent>
 
-        <SidebarFooter>
-            <!-- <NavFooter :items="footerNavItems" /> -->
-            <SidebarMenu>
-                <SidebarMenuItem>
-                    <SidebarMenuButton :as-child="true">
-                        <Link href="https://github.com/laravel/vue-starter-kit">
-                            <Plus class="size-4" />
-                            <span>Create new</span>
-                        </Link>
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
-            </SidebarMenu>
-            <NavUser />
-        </SidebarFooter>
+      <SidebarFooter>
+        <Dialog :open="form.hasErrors || openDialog" @update:open="val => openDialog = val">
+          <DialogTrigger as-child>
+            <SidebarMenuButton :as-child="true">
+              <Button variant="outline" type="button">
+                <Plus class="size-4" />
+                <span>Create new</span>
+              </Button>
+            </SidebarMenuButton>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create New Folder</DialogTitle>
+            </DialogHeader>
+            <form @submit.prevent="createFolder">
+              <label for="name" class="block text-sm font-medium mb-1 sr-only">Folder Name</label>
+              <Input
+                id="name"
+                v-model="form.name"
+                type="text"
+                placeholder="Folder name"
+                class="mb-2"
+                :class="{ 'border-destructive': form.errors.name }"
+              />
+              <InputError :message="form.errors.name" class="mt-2" />
+
+              <DialogFooter>
+                <DialogClose as-child>
+                  <Button type="button" variant="outline">Cancel</Button>
+                </DialogClose>
+                <Button type="submit" :disabled="form.processing || !form.name.trim()">Create</Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+        <NavUser />
+      </SidebarFooter>
     </Sidebar>
     <slot />
-</template>
+  </template>
+
+  <script setup lang="ts">
+  import NavMain from '@/components/NavMain.vue'
+  import NavUser from '@/components/NavUser.vue'
+  import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar'
+  import { type NavItem } from '@/types'
+  import { Link, useForm } from '@inertiajs/vue3'
+  import { ExternalLink, Files, LayoutGrid, Trash, Plus } from 'lucide-vue-next'
+  import AppLogo from './AppLogo.vue'
+  import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog'
+  import { Input } from '@/components/ui/input'
+  import { Button } from '@/components/ui/button'
+  import InputError from '@/components/InputError.vue'
+  import { ref } from 'vue'
+
+  const openDialog = ref(false)
+
+  const mainNavItems: NavItem[] = [
+    { title: 'My Files', href: '/my-files', icon: Files },
+    { title: 'Shared with me', href: '#', icon: ExternalLink },
+    { title: 'Shared by me', href: '#', icon: LayoutGrid },
+    { title: 'Trash', href: '#', icon: Trash },
+  ]
+
+  const form = useForm({ name: '' })
+
+  function createFolder() {
+    form.post('/folders', {
+      preserveScroll: true,
+      onSuccess: () => {
+        form.reset('name')
+        openDialog.value = false
+      },
+      onError: () => {
+        openDialog.value = true
+      }
+    })
+  }
+  </script>

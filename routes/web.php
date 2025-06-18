@@ -12,9 +12,12 @@ Route::get('dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::controller(FileController::class)->middleware(['auth', 'verified'])->group(function() {
-    Route::get('/my-files', 'myFiles')->name('myFiles');
-});
+Route::controller(FileController::class)
+    ->middleware(['auth', 'verified'])
+    ->group(function () {
+        Route::get('/my-files', 'myFiles')->name('myFiles');
+        Route::post('/folders', 'createFolder')->name('folder.create');
+    });
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
