@@ -2,15 +2,27 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\File;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class FileController extends Controller
 {
-    //
+    public function myFiles()
+    {
+        $folder =  $this->getRoot();
 
-    public function myFiles() {
-        return Inertia::render('MyFiles');
+        $items = File::query()
+            ->where('parent_id', $folder->id)
+            ->where('created_by', Auth::id())
+            ->orderBy('is_folder', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+        return Inertia::render('MyFiles', [
+            'items' => $items,
+        ]);
     }
 
     public function createFolder(Request $request)
@@ -34,5 +46,12 @@ class FileController extends Controller
 
         return back()->with('success', 'Folder created successfully!');
     }
-   
+
+    private function getRoot()
+    {
+        return File::whereIsRoot()
+            ->where('created_by', Auth::id())
+            ->firstOrFail();
+    }
+
 }
