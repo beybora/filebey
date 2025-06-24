@@ -9,6 +9,12 @@ use Inertia\Inertia;
 
 class FileController extends Controller
 {
+    private function getRoot()
+    {
+        return File::whereIsRoot()
+            ->where('created_by', Auth::id())
+            ->firstOrFail();
+    }
     public function myFiles()
     {
         $folder =  $this->getRoot();
@@ -46,12 +52,22 @@ class FileController extends Controller
 
         return back()->with('success', 'Folder created successfully!');
     }
-
-    private function getRoot()
+    public function destroy(Request $request)
     {
-        return File::whereIsRoot()
-            ->where('created_by', Auth::id())
-            ->firstOrFail();
+        $validated = $request->validate([
+            'id' => 'required|exists:files,id',
+        ]);
+
+        $file = File::with('descendants')->where('id', $validated['id'])->firstOrFail();
+
+        if ($file->created_by !== Auth::id()) {
+            abort(403, 'You do not have permission to delete this item.');
+        }
+
+        $file->delete();
+
+        return back()->with('success', 'Deleted successfully!');
     }
+
 
 }

@@ -17,6 +17,7 @@ Route::controller(FileController::class)
     ->group(function () {
         Route::get('/my-files', 'myFiles')->name('myFiles');
         Route::post('/folders', 'createFolder')->name('folder.create');
+        Route::delete('/folders', 'destroy')->name('folder.destroy');
     });
 
 require __DIR__.'/settings.php';
