@@ -77,7 +77,7 @@
     { title: 'My Files', href: '/my-files', icon: Files },
     { title: 'Shared with me', href: '#', icon: ExternalLink },
     { title: 'Shared by me', href: '#', icon: LayoutGrid },
-    { title: 'Trash', href: '#', icon: Trash },
+    { title: 'Trash', href: '/trash', icon: Trash },
   ]
 
   const form = useForm({ name: '' })

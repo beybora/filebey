@@ -31,6 +31,18 @@ class FileController extends Controller
         ]);
     }
 
+    public function trash() {
+        $items = File::onlyTrashed()
+            ->where('created_by', Auth::id())
+            ->orderBy('is_folder', 'desc')
+            ->orderBy('deleted_at', 'desc')
+            ->paginate(10);
+
+        return Inertia::render('Trash', [
+            'items' => $items
+        ]);
+    }
+
     public function createFolder(Request $request)
     {
         $data = $request->validate([
